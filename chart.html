@@ -1,0 +1,147 @@
+<html>
+<head>
+<script src="d3.min.js"></script>
+<link rel="stylesheet" href="material.css">
+<style>
+*{
+    box-sizing: border-box;
+}
+.chart{
+    width: 500px; 
+    transform: rotate(-90deg) translateY(-500px);
+    transform-origin: right top;
+}
+.chart div{
+    text-align: right;
+    font-size: 24px;
+    padding-right: 12px;
+    padding-top: 6px;
+    margin-bottom: 10px;
+}
+div.inputs{
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 300px;
+}
+div.inputs > *{
+    display: block
+}
+div.inputs textarea{
+    width: 100%
+}
+div.swatchContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+div.swatchContainer > span{
+    display:block;
+    margin-bottom: 8px;
+}
+div.swatchContainer div.swatch{
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+}
+</style>
+</head>
+<body>
+<div class="chart">
+</div>
+<div class="inputs">
+    <textarea id="jsArray" name="jsArray"></textarea>
+    <label>Use default
+        <input type="radio" id="useCurrent" name="sourceSelector" checked>
+    </label>
+    <label>Use randomise
+        <input type="radio" id="useRandom" name="sourceSelector">
+    </label>
+    <label>Use JS array string
+        <input type="radio" id="useJsArray" name="sourceSelector">
+    </label>
+    <input type="button" id="storePalette" onclick="storePallete()" value="Store Palette">
+    <input type="button" id="drawChart" onclick="drawChart()" value="Draw Chart">
+</div>
+<div class="swatchContainer">
+    
+</div>
+<script>
+var data = [5,6,2,7,4,9,7,2,1,4,5,6,8,5,4,3,5,7,3,7,5,4,8,5,2,3,1,8];
+var MaterialColors = ['red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue',
+               'light-blue', 'cyan', 'teal', 'green', 'light-green', 'lime',
+               'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey'];
+var brewerColors = [
+    '#1f78b4','#33a02c','#e31a1c','#ff7f00','#6a3d9a','#b15928',
+    '#a6cee3','#b2df8a','#fb9a99','#fdbf6f','#cab2d6','#ffff99'
+    ];              
+var shuffledRandom = [
+    ["#b2df8a", "#fb9a99", "#ffff99", "#cab2d6", "#a6cee3", "#fdbf6f", "#e31a1c", "#1f78b4", "#b15928", "#ff7f00", "#6a3d9a", "#33a02c"]
+];
+function shuffleArray(arrayToShuffle, iterations){
+    var _tempArray = arrayToShuffle.slice(0),
+        _returnArray = [];
+    for (var i = 0 ; _tempArray.length > 0 ; i++){
+        _elemNumber = Math.floor(Math.random() * _tempArray.length);
+        _returnArray[i] = _tempArray.splice(_elemNumber,1)[0];
+    }
+    console.log(_returnArray);
+    return _returnArray;
+}
+var colors = brewerColors;
+
+function drawChart(){
+    if(document.querySelector('#useJsArray').checked && document.querySelector('#jsArray').value.length > 0){
+        colors=eval(document.querySelector('#jsArray').value);
+    }else if(document.querySelector('#useRandom').checked){
+        colors = shuffleArray(brewerColors);
+    }else{
+        colors=brewerColors;
+    }
+    //var colors = shuffledRandom[0];
+    d3.select(".chart")
+      .html("")
+      .selectAll("div")
+        .data(data)
+      .enter().append("div")
+        .style("width", function(d) { return d * 50 + "px"; })
+        .style("height", "40px")
+        //.attr('class', function(d,i){return 'mdc-bg-' + materialColors[i]})
+        .style('background-color', function(d,i){return colors[i % colors.length]})
+        .text(function(d) { return d; });
+}
+var Storage = window.localStorage;
+if (!Storage.getItem('MyPalettes')) {
+    var _palettes = {palettes:[brewerColors]}
+    Storage.setItem('MyPalettes' , JSON.stringify(_palettes));
+}
+var myPalettes = JSON.parse(Storage.getItem('MyPalettes'));
+console.log(myPalettes);
+function storePallete(){
+    myPalettes.palettes.push(colors.splice(0));
+    Storage.setItem('MyPalettes', JSON.stringify(myPalettes));
+    console.log(JSON.parse(Storage.getItem('MyPalettes')));
+    showPalettes();
+}
+function showPalettes(){
+    document.querySelector('.swatchContainer').innerHTML = "";
+    var _palettes = JSON.parse(Storage.getItem('MyPalettes'));
+    for(var i = 0 ; i< _palettes.palettes.length ; i ++){
+        var _s = document.createElement('span');
+        document.querySelector('.swatchContainer').appendChild(_s);
+        var _current = _palettes.palettes[i];
+        for(var j = 0 ; j < _current.length ; j++){
+            var _d = document.createElement('div');
+            _d.setAttribute('class', 'swatch');
+            _d.setAttribute('style', "background-color:" + _current[j]);
+            document.querySelectorAll('.swatchContainer span')[i].appendChild(_d);
+        }
+    }
+}
+drawChart();
+showPalettes()
+</script>
+</body>
+</html>
