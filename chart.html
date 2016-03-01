@@ -62,10 +62,12 @@ div.swatchContainer div.swatch{
     <label>Use JS array string
         <input type="radio" id="useJsArray" name="sourceSelector">
     </label>
-    <input type="button" id="storePalette" onclick="storePallete()" value="Store Palette">
+    <input type="button" id="storePalette" onclick="storePalette()" value="Store Palette">
+    <input type="button" id="clearPalettes" onclick="clearPalettes()" value="Clear Palettes">
+    <input type="button" id="togglePalettes" onclick="togglePalettes()" value="Toggle Palettes">
     <input type="button" id="drawChart" onclick="drawChart()" value="Draw Chart">
 </div>
-<div class="swatchContainer">
+<div class="swatchContainer" style="display:none">
     
 </div>
 <script>
@@ -94,11 +96,11 @@ var colors = brewerColors;
 
 function drawChart(){
     if(document.querySelector('#useJsArray').checked && document.querySelector('#jsArray').value.length > 0){
-        colors=eval(document.querySelector('#jsArray').value);
+        colors = eval(document.querySelector('#jsArray').value);
     }else if(document.querySelector('#useRandom').checked){
         colors = shuffleArray(brewerColors);
     }else{
-        colors=brewerColors;
+        colors = brewerColors;
     }
     //var colors = shuffledRandom[0];
     d3.select(".chart")
@@ -112,36 +114,70 @@ function drawChart(){
         .style('background-color', function(d,i){return colors[i % colors.length]})
         .text(function(d) { return d; });
 }
+
 var Storage = window.localStorage;
-if (!Storage.getItem('MyPalettes')) {
-    var _palettes = {palettes:[brewerColors]}
-    Storage.setItem('MyPalettes' , JSON.stringify(_palettes));
-}
-var myPalettes = JSON.parse(Storage.getItem('MyPalettes'));
+var myPalettes = {};
+initPalettes();
 console.log(myPalettes);
-function storePallete(){
-    myPalettes.palettes.push(colors.splice(0));
-    Storage.setItem('MyPalettes', JSON.stringify(myPalettes));
-    console.log(JSON.parse(Storage.getItem('MyPalettes')));
-    showPalettes();
-}
-function showPalettes(){
-    document.querySelector('.swatchContainer').innerHTML = "";
-    var _palettes = JSON.parse(Storage.getItem('MyPalettes'));
-    for(var i = 0 ; i< _palettes.palettes.length ; i ++){
-        var _s = document.createElement('span');
-        document.querySelector('.swatchContainer').appendChild(_s);
-        var _current = _palettes.palettes[i];
-        for(var j = 0 ; j < _current.length ; j++){
-            var _d = document.createElement('div');
-            _d.setAttribute('class', 'swatch');
-            _d.setAttribute('style', "background-color:" + _current[j]);
-            document.querySelectorAll('.swatchContainer span')[i].appendChild(_d);
-        }
+buildPalettes();
+
+function initPalettes(){
+    //test for stored palettes
+    var storedPalettes = Storage.getItem('MyPalettes');
+    if (storedPalettes && storedPalettes.palettes && storedPalettes.palettes.length > 0) {
+        //stored palettes, retreive them
+        retreivePalettes();
+    }else if(!myPalettes.palettes){
+        //no palettes, populate with brewer
+        myPalettes = {palettes: [brewerColors]};
+        storePalettes();
     }
 }
-drawChart();
-showPalettes()
+function retreivePalettes(){
+    myPalettes = JSON.parse(Storage.getItem('MyPalettes'));
+}
+function storePalette(){
+    myPalettes.palettes.push(colors.slice(0));
+    storePalettes();
+}
+function storePalettes(){
+    Storage.setItem('MyPalettes', JSON.stringify(myPalettes));
+    console.log(JSON.parse(Storage.getItem('MyPalettes')));
+    buildPalettes();
+}
+function togglePalettes(){
+    var _swatchContainer = document.querySelector('.swatchContainer');
+    style = window.getComputedStyle(_swatchContainer),
+    display = style.getPropertyValue('display');
+    if(display === 'none'){
+        _swatchContainer.setAttribute('style', 'display: block');
+    }else{
+        _swatchContainer.setAttribute('style', 'display: none');
+    }
+}
+function buildPalettes(){
+var _swatchContainer = document.querySelector('.swatchContainer');
+    _swatchContainer.innerHTML = "";
+    retreivePalettes();
+    if(myPalettes && myPalettes.palettes){
+        for(var i = 0 ; i< myPalettes.palettes.length ; i ++){
+            var _s = document.createElement('span');
+            document.querySelector('.swatchContainer').appendChild(_s);
+            var _current = myPalettes.palettes[i];
+            for(var j = 0 ; j < _current.length ; j++){
+                var _d = document.createElement('div');
+                _d.setAttribute('class', 'swatch');
+                _d.setAttribute('style', "background-color:" + _current[j]);
+                document.querySelectorAll('.swatchContainer span')[i].appendChild(_d);
+            }
+        }
+    }
+
+}
+function clearPalettes(){
+    myPalettes = {palettes: []};
+    Storage.setItem('MyPalettes', JSON.stringify(myPalettes));
+}
 </script>
 </body>
 </html>
