@@ -54,13 +54,13 @@ div.swatchContainer div.swatch{
 <div class="inputs">
     <textarea id="jsArray" name="jsArray"></textarea>
     <label>Use default
-        <input type="radio" id="useCurrent" name="sourceSelector" checked>
+        <input type="radio" id="useCurrent" name="sourceSelector" checked onchange="drawChart()">
     </label>
     <label>Use randomise
-        <input type="radio" id="useRandom" name="sourceSelector">
+        <input type="radio" id="useRandom" name="sourceSelector" onchange="drawChart()">
     </label>
     <label>Use JS array string
-        <input type="radio" id="useJsArray" name="sourceSelector">
+        <input type="radio" id="useJsArray" name="sourceSelector" onchange="drawChart()">
     </label>
     <input type="button" id="storePalette" onclick="storePalette()" value="Store Palette">
     <input type="button" id="clearPalettes" onclick="clearPalettes()" value="Clear Palettes">
@@ -82,7 +82,7 @@ var brewerColors = [
 var shuffledRandom = [
     ["#b2df8a", "#fb9a99", "#ffff99", "#cab2d6", "#a6cee3", "#fdbf6f", "#e31a1c", "#1f78b4", "#b15928", "#ff7f00", "#6a3d9a", "#33a02c"]
 ];
-function shuffleArray(arrayToShuffle, iterations){
+function shuffleArray(arrayToShuffle){
     var _tempArray = arrayToShuffle.slice(0),
         _returnArray = [];
     for (var i = 0 ; _tempArray.length > 0 ; i++){
@@ -177,6 +177,7 @@ var _swatchContainer = document.querySelector('.swatchContainer');
 function clearPalettes(){
     myPalettes = {palettes: []};
     Storage.setItem('MyPalettes', JSON.stringify(myPalettes));
+    buildPalettes();
 }
 </script>
 </body>
