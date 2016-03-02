@@ -1,184 +1,221 @@
 <html>
-<head>
-<script src="d3.min.js"></script>
-<link rel="stylesheet" href="material.css">
-<style>
-*{
-    box-sizing: border-box;
-}
-.chart{
-    width: 500px; 
-    transform: rotate(-90deg) translateY(-500px);
-    transform-origin: right top;
-}
-.chart div{
-    text-align: right;
-    font-size: 24px;
-    padding-right: 12px;
-    padding-top: 6px;
-    margin-bottom: 10px;
-}
-div.inputs{
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 300px;
-}
-div.inputs > *{
-    display: block
-}
-div.inputs textarea{
-    width: 100%
-}
-div.swatchContainer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 8px;
-    background-color: rgba(255, 255, 255, 0.5);
-}
-div.swatchContainer > span{
-    display:block;
-    margin-bottom: 8px;
-}
-div.swatchContainer div.swatch{
-    width: 32px;
-    height: 32px;
-    display: inline-block;
-}
-</style>
-</head>
-<body>
-<div class="chart">
-</div>
-<div class="inputs">
-    <textarea id="jsArray" name="jsArray"></textarea>
-    <label>Use default
-        <input type="radio" id="useCurrent" name="sourceSelector" checked onchange="drawChart()">
-    </label>
-    <label>Use randomise
-        <input type="radio" id="useRandom" name="sourceSelector" onchange="drawChart()">
-    </label>
-    <label>Use JS array string
-        <input type="radio" id="useJsArray" name="sourceSelector" onchange="drawChart()">
-    </label>
-    <input type="button" id="storePalette" onclick="storePalette()" value="Store Palette">
-    <input type="button" id="clearPalettes" onclick="clearPalettes()" value="Clear Palettes">
-    <input type="button" id="togglePalettes" onclick="togglePalettes()" value="Toggle Palettes">
-    <input type="button" id="drawChart" onclick="drawChart()" value="Draw Chart">
-</div>
-<div class="swatchContainer" style="display:none">
-    
-</div>
-<script>
-var data = [5,6,2,7,4,9,7,2,1,4,5,6,8,5,4,3,5,7,3,7,5,4,8,5,2,3,1,8];
-var MaterialColors = ['red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue',
-               'light-blue', 'cyan', 'teal', 'green', 'light-green', 'lime',
-               'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey'];
-var brewerColors = [
-    '#1f78b4','#33a02c','#e31a1c','#ff7f00','#6a3d9a','#b15928',
-    '#a6cee3','#b2df8a','#fb9a99','#fdbf6f','#cab2d6','#ffff99'
-    ];              
-var shuffledRandom = [
-    ["#b2df8a", "#fb9a99", "#ffff99", "#cab2d6", "#a6cee3", "#fdbf6f", "#e31a1c", "#1f78b4", "#b15928", "#ff7f00", "#6a3d9a", "#33a02c"]
-];
-function shuffleArray(arrayToShuffle){
-    var _tempArray = arrayToShuffle.slice(0),
-        _returnArray = [];
-    for (var i = 0 ; _tempArray.length > 0 ; i++){
-        _elemNumber = Math.floor(Math.random() * _tempArray.length);
-        _returnArray[i] = _tempArray.splice(_elemNumber,1)[0];
-    }
-    console.log(_returnArray);
-    return _returnArray;
-}
-var colors = brewerColors;
+    <head>
+        <script src="d3.min.js"></script>
+        <script src="chroma.min.js"></script>
+        <link rel="stylesheet" href="material.css">
+        <style>
+        *{
+            box-sizing: border-box;
+        }
+        div.chartContainer{
+            height: 500px;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        .chart{
+            width: 500px; 
+            transform: rotate(-90deg) translateY(-500px);
+            transform-origin: right top;
+        }
+        .chart div{
+            text-align: right;
+            font-size: 24px;
+            padding-right: 12px;
+            padding-top: 6px;
+            margin-bottom: 10px;
+        }
+        div.inputs{
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 300px;
+        }
+        div.inputs > *{
+            display: block
+        }
+        div.inputs textarea{
+            width: 100%
+        }
+        div.swatchContainer, div.currentPaletteContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        div.currentPaletteContainer{
+            top: 520px;
+            width: 100%;
+            text-align: center;
+        }
+        div.swatchContainer > span, div.currentPaletteContainer > span{
+            display:block;
+            margin-bottom: 8px;
+        }
+        div.swatchContainer div.swatch, div.currentPaletteContainer div.swatch{
+            width: 32px;
+            height: 32px;
+            display: inline-block;
+        }
+        div.currentPaletteContainer div.swatch{
+            width: 128px;
+            height: 128px;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="chartContainer">
+            <div class="chart">
+            </div>
+        </div>
+        <div class="inputs">
+            <textarea id="jsArray" name="jsArray"></textarea>
+            <label>Use default
+                <input type="radio" id="useCurrent" name="sourceSelector" checked onchange="drawChart()">
+            </label>
+            <label>Use randomise
+                <input type="radio" id="useRandom" name="sourceSelector" onchange="drawChart()">
+            </label>
+            <label>Use JS array string
+                <input type="radio" id="useJsArray" name="sourceSelector" onchange="drawChart()">
+            </label>
+            <input type="button" id="storePalette" onclick="storePalette()" value="Store Palette">
+            <input type="button" id="clearPalettes" onclick="clearPalettes()" value="Clear Palettes">
+            <input type="button" id="togglePalettes" onclick="togglePalettes()" value="Toggle Palettes">
+            <input type="button" id="drawChart" onclick="drawChart()" value="Draw Chart">
+        </div>
+        <div class="swatchContainer" style="display:none">
+        </div>
+        <div class="currentPaletteContainer">
+        </div>
+        <script>
+        var data = [5,6,2,7,4,9,7,2,1,4,5,6,8,5,4,3,5,7,3,7,5,4,8,5,2,3,1,8];
+        var MaterialColors = ['red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue',
+            'light-blue', 'cyan', 'teal', 'green', 'light-green', 'lime',
+            'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey'];
+        var brewerColors = [
+            '#1f78b4','#33a02c','#e31a1c','#ff7f00','#6a3d9a','#b15928',
+            '#a6cee3','#b2df8a','#fb9a99','#fdbf6f','#cab2d6','#ffff99'
+            ];     
+        var brewerPastel = ['#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462',
+            '#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f']
+        var shuffledRandom = [
+            ["#b2df8a", "#fb9a99", "#ffff99", "#cab2d6", "#a6cee3", "#fdbf6f", "#e31a1c", "#1f78b4", "#b15928", "#ff7f00", "#6a3d9a", "#33a02c"]
+        ];
+        function shuffleArray(arrayToShuffle){
+            var _tempArray = arrayToShuffle.slice(0),
+                _returnArray = [];
+            for (var i = 0 ; _tempArray.length > 0 ; i++){
+                _elemNumber = Math.floor(Math.random() * _tempArray.length);
+                _returnArray[i] = _tempArray.splice(_elemNumber,1)[0];
+            }
+            console.log(_returnArray);
+            return _returnArray;
+        }
+        var colors = brewerColors;
 
-function drawChart(){
-    if(document.querySelector('#useJsArray').checked && document.querySelector('#jsArray').value.length > 0){
-        colors = eval(document.querySelector('#jsArray').value);
-    }else if(document.querySelector('#useRandom').checked){
-        colors = shuffleArray(brewerColors);
-    }else{
-        colors = brewerColors;
-    }
-    //var colors = shuffledRandom[0];
-    d3.select(".chart")
-      .html("")
-      .selectAll("div")
-        .data(data)
-      .enter().append("div")
-        .style("width", function(d) { return d * 50 + "px"; })
-        .style("height", "40px")
-        //.attr('class', function(d,i){return 'mdc-bg-' + materialColors[i]})
-        .style('background-color', function(d,i){return colors[i % colors.length]})
-        .text(function(d) { return d; });
-}
+        function drawChart(){
+            if(document.querySelector('#useJsArray').checked && document.querySelector('#jsArray').value.length > 0){
+                colors = eval(document.querySelector('#jsArray').value);
+            }else if(document.querySelector('#useRandom').checked){
+                colors = shuffleArray(colors);
+            }else{
+                colors = brewerColors;
+            }
+            //var colors = shuffledRandom[0];
+            d3.select(".chart")
+              .html("")
+              .selectAll("div")
+                .data(data)
+              .enter().append("div")
+                .style("width", function(d) { return d * 50 + "px"; })
+                .style("height", "40px")
+                //.attr('class', function(d,i){return 'mdc-bg-' + materialColors[i]})
+                .style('background-color', function(d,i){return colors[i % colors.length]})
+                .text(function(d) { return d; });
+            showCurrentPalette();
+        }
 
-var Storage = window.localStorage;
-var myPalettes = {};
-initPalettes();
-console.log(myPalettes);
-buildPalettes();
+        var Storage = window.localStorage;
+        var myPalettes = {};
+        initPalettes();
+        console.log(myPalettes);
+        buildPalettes();
 
-function initPalettes(){
-    //test for stored palettes
-    var storedPalettes = JSON.parse(Storage.getItem('MyPalettes'));
-    if (storedPalettes && storedPalettes.palettes && storedPalettes.palettes.length > 0) {
-        //stored palettes, retreive them
-        retreivePalettes();
-    }else if(!myPalettes.palettes){
-        //no palettes, populate with brewer
-        myPalettes = {palettes: [brewerColors]};
-        storePalettes();
-    }
-}
-function retreivePalettes(){
-    myPalettes = JSON.parse(Storage.getItem('MyPalettes'));
-}
-function storePalette(){
-    myPalettes.palettes.push(colors.slice(0));
-    storePalettes();
-}
-function storePalettes(){
-    Storage.setItem('MyPalettes', JSON.stringify(myPalettes));
-    console.log(JSON.parse(Storage.getItem('MyPalettes')));
-    buildPalettes();
-}
-function togglePalettes(){
-    var _swatchContainer = document.querySelector('.swatchContainer');
-    style = window.getComputedStyle(_swatchContainer),
-    display = style.getPropertyValue('display');
-    if(display === 'none'){
-        _swatchContainer.setAttribute('style', 'display: block');
-    }else{
-        _swatchContainer.setAttribute('style', 'display: none');
-    }
-}
-function buildPalettes(){
-var _swatchContainer = document.querySelector('.swatchContainer');
-    _swatchContainer.innerHTML = "";
-    retreivePalettes();
-    if(myPalettes && myPalettes.palettes){
-        for(var i = 0 ; i< myPalettes.palettes.length ; i ++){
-            var _s = document.createElement('span');
-            document.querySelector('.swatchContainer').appendChild(_s);
-            var _current = myPalettes.palettes[i];
-            for(var j = 0 ; j < _current.length ; j++){
-                var _d = document.createElement('div');
-                _d.setAttribute('class', 'swatch');
-                _d.setAttribute('style', "background-color:" + _current[j]);
-                document.querySelectorAll('.swatchContainer span')[i].appendChild(_d);
+        function initPalettes(){
+            //test for stored palettes
+            var storedPalettes = JSON.parse(Storage.getItem('MyPalettes'));
+            if (storedPalettes && storedPalettes.palettes && storedPalettes.palettes.length > 0) {
+                //stored palettes, retreive them
+                retreivePalettes();
+            }else if(!myPalettes.palettes){
+                //no palettes, populate with brewer
+                myPalettes = {palettes: [brewerColors]};
+                storePalettes();
             }
         }
-    }
+        function retreivePalettes(){
+            myPalettes = JSON.parse(Storage.getItem('MyPalettes'));
+        }
+        function storePalette(){
+            myPalettes.palettes.push(colors.slice(0));
+            storePalettes();
+        }
+        function storePalettes(){
+            Storage.setItem('MyPalettes', JSON.stringify(myPalettes));
+            console.log(JSON.parse(Storage.getItem('MyPalettes')));
+            buildPalettes();
+        }
+        function togglePalettes(){
+            var _swatchContainer = document.querySelector('.swatchContainer');
+            style = window.getComputedStyle(_swatchContainer),
+            display = style.getPropertyValue('display');
+            if(display === 'none'){
+                _swatchContainer.setAttribute('style', 'display: block');
+            }else{
+                _swatchContainer.setAttribute('style', 'display: none');
+            }
+        }
+        function buildPalettes(){
+            var _swatchContainer = document.querySelector('.swatchContainer');
+            _swatchContainer.innerHTML = "";
+            retreivePalettes();
+            if(myPalettes && myPalettes.palettes){
+                for(var i = 0 ; i< myPalettes.palettes.length ; i ++){
+                    var _s = document.createElement('span');
+                    document.querySelector('.swatchContainer').appendChild(_s);
+                    var _current = myPalettes.palettes[i];
+                    for(var j = 0 ; j < _current.length ; j++){
+                        var _d = document.createElement('div');
+                        _d.setAttribute('class', 'swatch');
+                        _d.setAttribute('style', "background-color:" + _current[j]);
+                        document.querySelectorAll('.swatchContainer span')[i].appendChild(_d);
+                    }
+                }
+            }
 
-}
-function clearPalettes(){
-    myPalettes = {palettes: []};
-    Storage.setItem('MyPalettes', JSON.stringify(myPalettes));
-    buildPalettes();
-}
-</script>
-</body>
+        }
+        function showCurrentPalette(){
+            var _currentPaletteContainer = document.querySelector('.currentPaletteContainer');
+            _currentPaletteContainer.innerHTML = "";
+            var _s = document.createElement('span');
+            document.querySelector('.currentPaletteContainer').appendChild(_s);
+            for(var i = 0 ; i< colors.length ; i ++){
+                var _d = document.createElement('div');
+                _d.setAttribute('class', 'swatch');
+                _d.setAttribute('style', "background-color:" + colors[i]);
+                var _rgbString = "rgb(" + chroma(colors[i]).rgb() + ')';
+                var _hslString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ',' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
+                var _hexString = chroma(colors[i]).hex();
+                _d.innerHTML = '<p>' + _hexString + '</p><p>' + _rgbString + ' </p><p>' + _hslString + ' </p>';
+                document.querySelector('.currentPaletteContainer span').appendChild(_d);
+            }
+        }
+        function clearPalettes(){
+            myPalettes = {palettes: []};
+            Storage.setItem('MyPalettes', JSON.stringify(myPalettes));
+            buildPalettes();
+        }
+        </script>
+    </body>
 </html>
