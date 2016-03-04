@@ -1,7 +1,7 @@
 <html>
     <head>
-        <script src="d3.min.js"></script>
-        <script src="chroma.min.js"></script>
+        <script src="js/d3.min.js"></script>
+        <script src="js/chroma.min.js"></script>
         <link rel="stylesheet" href="material.css">
         <style>
         *{
@@ -70,8 +70,11 @@
         </div>
         <div class="inputs">
             <textarea id="jsArray" name="jsArray"></textarea>
-            <label>Use default
-                <input type="radio" id="useCurrent" name="sourceSelector" checked onchange="drawChart()">
+            <label>Use brewer colours
+                <input type="radio" id="useBrewer" name="sourceSelector" checked onchange="drawChart()">
+            </label>
+            <label>Use brewer pastel colours
+                <input type="radio" id="useBrewerPastel" name="sourceSelector" onchange="drawChart()">
             </label>
             <label>Use randomise
                 <input type="radio" id="useRandom" name="sourceSelector" onchange="drawChart()">
@@ -88,6 +91,8 @@
         </div>
         <div class="currentPaletteContainer">
         </div>
+        <div class="printablePaletteContainer">
+        </div>
         <script>
         var data = [5,6,2,7,4,9,7,2,1,4,5,6,8,5,4,3,5,7,3,7,5,4,8,5,2,3,1,8];
         var MaterialColors = ['red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue',
@@ -97,7 +102,8 @@
             '#1f78b4','#33a02c','#e31a1c','#ff7f00','#6a3d9a','#b15928',
             '#a6cee3','#b2df8a','#fb9a99','#fdbf6f','#cab2d6','#ffff99'
             ];     
-        var brewerPastel = ['#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462',
+        var brewerPastel = [
+            '#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462',
             '#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f']
         var shuffledRandom = [
             ["#b2df8a", "#fb9a99", "#ffff99", "#cab2d6", "#a6cee3", "#fdbf6f", "#e31a1c", "#1f78b4", "#b15928", "#ff7f00", "#6a3d9a", "#33a02c"]
@@ -119,8 +125,10 @@
                 colors = eval(document.querySelector('#jsArray').value);
             }else if(document.querySelector('#useRandom').checked){
                 colors = shuffleArray(colors);
-            }else{
+            }else if (document.querySelector('#useBrewer').checked){
                 colors = brewerColors;
+            }else if (document.querySelector('#useBrewerPastel').checked){
+                colors = brewerPastel;
             }
             //var colors = shuffledRandom[0];
             d3.select(".chart")
@@ -209,6 +217,53 @@
                 var _hexString = chroma(colors[i]).hex();
                 _d.innerHTML = '<p>' + _hexString + '</p><p>' + _rgbString + ' </p><p>' + _hslString + ' </p>';
                 document.querySelector('.currentPaletteContainer span').appendChild(_d);
+            }
+        }
+        function printablePalette(){
+            var _printablePaletteContainer = document.querySelector('.printablePaletteContainer');
+            _printablePaletteContainer.innerHTML = "";
+            for( var j = 0 ; j < 3 ; j++){
+                var _l = document.createElement('list');
+                for(var i = 0 ; i< colors.length ; i ++){
+                    var _colorString;
+                    var _li = document.createElement('li');
+                    _li.setAttribute('class', 'swatch');
+                    _li.setAttribute('style', "background-color:" + colors[i]);
+                    switch(j){
+                        case 0:
+                            _colorString = chroma(colors[i]).hex();
+                            break;
+                        case 1:
+                            _colorString = "rgb(" + chroma(colors[i]).rgb() + ')';
+                            break;
+                        case 2:
+                            var _colorString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ',' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
+                            break;    
+                    }
+                    _li.innerHTML = '<p>' + _colorString + '</p>';
+                    _l.appendChild(_li);
+                }
+                document.querySelector('.printablePaletteContainer').appendChild(_l);
+                /*for(var i = 0 ; i< colors.length ; i ++){
+                    var _d = document.createElement('li');
+                    _d.setAttribute('class', 'swatch');
+                    _d.setAttribute('style', "background-color:" + colors[i]);
+                    var _rgbString = "rgb(" + chroma(colors[i]).rgb() + ')';
+                    var _hslString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ',' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
+                    var _hexString = chroma(colors[i]).hex();
+                    _d.innerHTML = '<p>' + _hexString + '</p><p>' + _rgbString + ' </p><p>' + _hslString + ' </p>';
+                    document.querySelector('.currentPaletteContainer span').appendChild(_d);
+                }
+                for(var i = 0 ; i< colors.length ; i ++){
+                    var _d = document.createElement('li');
+                    _d.setAttribute('class', 'swatch');
+                    _d.setAttribute('style', "background-color:" + colors[i]);
+                    var _rgbString = "rgb(" + chroma(colors[i]).rgb() + ')';
+                    var _hslString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ',' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
+                    var _hexString = chroma(colors[i]).hex();
+                    _d.innerHTML = '<p>' + _hexString + '</p><p>' + _rgbString + ' </p><p>' + _hslString + ' </p>';
+                    document.querySelector('.currentPaletteContainer span').appendChild(_d);
+                }     */           
             }
         }
         function clearPalettes(){
