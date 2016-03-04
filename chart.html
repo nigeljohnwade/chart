@@ -101,13 +101,14 @@
             <input type="button" id="storePalette" onclick="storePalette()" value="Store Palette">
             <input type="button" id="clearPalettes" onclick="clearPalettes()" value="Clear Palettes">
             <input type="button" id="togglePalettes" onclick="togglePalettes()" value="Toggle Palettes">
+            <input type="button" id="togglePrintablePalette" onclick="togglePrintablePalette()" value="Toggle Printable Palette">
             <input type="button" id="drawChart" onclick="drawChart()" value="Draw Chart">
         </div>
         <div class="swatchContainer" style="display:none">
         </div>
         <div class="currentPaletteContainer">
         </div>
-        <div class="printablePaletteContainer">
+        <div class="printablePaletteContainer" style="display:none;">
         </div>
         <script>
         var data = [5,6,2,7,4,9,7,2,1,4,5,6,8,5,4,3,5,7,3,7,5,4,8,5,2,3,1,8];
@@ -259,27 +260,18 @@
                     _li.innerHTML = '<p>' + _colorString + '</p>';
                     _l.appendChild(_li);
                 }
-                document.querySelector('.printablePaletteContainer').appendChild(_l);
-                /*for(var i = 0 ; i< colors.length ; i ++){
-                    var _d = document.createElement('li');
-                    _d.setAttribute('class', 'swatch');
-                    _d.setAttribute('style', "background-color:" + colors[i]);
-                    var _rgbString = "rgb(" + chroma(colors[i]).rgb() + ')';
-                    var _hslString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ',' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
-                    var _hexString = chroma(colors[i]).hex();
-                    _d.innerHTML = '<p>' + _hexString + '</p><p>' + _rgbString + ' </p><p>' + _hslString + ' </p>';
-                    document.querySelector('.currentPaletteContainer span').appendChild(_d);
-                }
-                for(var i = 0 ; i< colors.length ; i ++){
-                    var _d = document.createElement('li');
-                    _d.setAttribute('class', 'swatch');
-                    _d.setAttribute('style', "background-color:" + colors[i]);
-                    var _rgbString = "rgb(" + chroma(colors[i]).rgb() + ')';
-                    var _hslString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ',' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
-                    var _hexString = chroma(colors[i]).hex();
-                    _d.innerHTML = '<p>' + _hexString + '</p><p>' + _rgbString + ' </p><p>' + _hslString + ' </p>';
-                    document.querySelector('.currentPaletteContainer span').appendChild(_d);
-                }     */           
+                document.querySelector('.printablePaletteContainer').appendChild(_l);        
+            }
+        }
+        function togglePrintablePalette(){
+            var _printablePaletteContainer = document.querySelector('.printablePaletteContainer');
+            style = window.getComputedStyle(_printablePaletteContainer),
+            display = style.getPropertyValue('display');
+            if(display === 'none'){
+                _printablePaletteContainer.setAttribute('style', 'display: block');
+            }else{
+                _printablePaletteContainer.setAttribute('style', 'display: none');
+                printablePalette();
             }
         }
         function clearPalettes(){
