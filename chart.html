@@ -61,6 +61,22 @@
             width: 128px;
             height: 128px;
         }
+        div.printablePaletteContainer{
+            position: absolute;
+            text-align: center;
+            width: 100%;
+            top: 0;
+            background-color: white;
+        }
+        div.printablePaletteContainer ul{
+            width: 30%;
+            display: inline-block;
+        }
+        div.printablePaletteContainer ul li{
+            list-style-type: none;
+            text-align: center;
+            padding:32px;
+        }
         </style>
     </head>
     <body>
@@ -223,7 +239,7 @@
             var _printablePaletteContainer = document.querySelector('.printablePaletteContainer');
             _printablePaletteContainer.innerHTML = "";
             for( var j = 0 ; j < 3 ; j++){
-                var _l = document.createElement('list');
+                var _l = document.createElement('ul');
                 for(var i = 0 ; i< colors.length ; i ++){
                     var _colorString;
                     var _li = document.createElement('li');
