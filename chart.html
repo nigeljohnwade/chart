@@ -56,6 +56,7 @@
             width: 32px;
             height: 32px;
             display: inline-block;
+            vertical-align: bottom;
         }
         div.currentPaletteContainer div.swatch{
             width: 128px;
@@ -69,13 +70,16 @@
             background-color: white;
         }
         div.printablePaletteContainer ul{
-            width: 30%;
+            width: 24%;
             display: inline-block;
         }
         div.printablePaletteContainer ul li{
             list-style-type: none;
             text-align: center;
             padding:32px;
+        }
+        div.printablePaletteContainer ul li.swatch{
+            height: 128px;
         }
         </style>
     </head>
@@ -85,23 +89,29 @@
             </div>
         </div>
         <div class="inputs">
-            <textarea id="jsArray" name="jsArray"></textarea>
             <label>Use brewer colours
                 <input type="radio" id="useBrewer" name="sourceSelector" checked onchange="drawChart()">
             </label>
             <label>Use brewer pastel colours
                 <input type="radio" id="useBrewerPastel" name="sourceSelector" onchange="drawChart()">
             </label>
-            <label>Use randomise
-                <input type="radio" id="useRandom" name="sourceSelector" onchange="drawChart()">
+            <label>Use brewer short and extend
+                <input type="radio" id="useBrewerShort" name="sourceSelector" onchange="drawChart()">
+            </label>
+            <label>Use brand and extend
+                <input type="radio" id="useBrand" name="sourceSelector" onchange="drawChart()">
             </label>
             <label>Use JS array string
                 <input type="radio" id="useJsArray" name="sourceSelector" onchange="drawChart()">
             </label>
+            <textarea id="jsArray" name="jsArray"></textarea>
+            <label>Use randomise
+                <input type="checkbox" id="useRandom" name="options" onchange="drawChart()">
+            </label>
             <input type="button" id="storePalette" onclick="storePalette()" value="Store Palette">
             <input type="button" id="clearPalettes" onclick="clearPalettes()" value="Clear Palettes">
             <input type="button" id="togglePalettes" onclick="togglePalettes()" value="Toggle Palettes">
-            <input type="button" id="togglePrintablePalette" onclick="togglePrintablePalette()" value="Toggle Printable Palette">
+            <input type="button" id="openPrintablePalette" onclick="togglePrintablePalette()" value="Open Printable Palette">
             <input type="button" id="drawChart" onclick="drawChart()" value="Draw Chart">
         </div>
         <div class="swatchContainer" style="display:none">
@@ -109,6 +119,9 @@
         <div class="currentPaletteContainer">
         </div>
         <div class="printablePaletteContainer" style="display:none;">
+        <input type="button" id="closePrintablePalette" onclick="togglePrintablePalette()" value="Close Printable Palette">
+            <div class="palette">
+            </div>
         </div>
         <script>
         var data = [5,6,2,7,4,9,7,2,1,4,5,6,8,5,4,3,5,7,3,7,5,4,8,5,2,3,1,8];
@@ -117,14 +130,76 @@
             'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey'];
         var brewerColors = [
             '#1f78b4','#33a02c','#e31a1c','#ff7f00','#6a3d9a','#b15928',
+            '#62a3d0','#72bf5b','#ef5a5a','#fe9f37','#9a77b8','#d8ac60',
             '#a6cee3','#b2df8a','#fb9a99','#fdbf6f','#cab2d6','#ffff99'
-            ];     
+            ];  
+        var brewerShort = [
+            '#1f78b4','#33a02c','#e31a1c','#ff7f00','#6a3d9a','#b15928'
+            ]
         var brewerPastel = [
             '#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462',
             '#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f']
         var shuffledRandom = [
             ["#b2df8a", "#fb9a99", "#ffff99", "#cab2d6", "#a6cee3", "#fdbf6f", "#e31a1c", "#1f78b4", "#b15928", "#ff7f00", "#6a3d9a", "#33a02c"]
         ];
+        var brandColors = [
+            '#48D5B5', '#21314d', '#FF585F', '#6e6e6e'
+        ]
+
+        var colors = brewerColors;
+
+        function drawChart(){
+            if(document.querySelector('#useJsArray').checked && document.querySelector('#jsArray').value.length > 0){
+                colors = eval(document.querySelector('#jsArray').value);
+                if(document.querySelector('#useRandom').checked){
+                    colors = shuffleArray(colors);
+                }
+            }else if (document.querySelector('#useBrewer').checked){
+                colors = brewerColors;
+                if(document.querySelector('#useRandom').checked){
+                    colors = shuffleArray(colors);
+                }
+            }else if (document.querySelector('#useBrewerPastel').checked){
+                colors = brewerPastel;
+                if(document.querySelector('#useRandom').checked){
+                    colors = shuffleArray(colors);
+                }
+            }else if (document.querySelector('#useBrewerShort').checked){
+                colors = brewerShort;
+                if(document.querySelector('#useRandom').checked){
+                    colors = shuffleArray(colors);
+                }
+                colors = extendPalette(colors, 0.3, 2);
+            }else if (document.querySelector('#useBrand').checked){
+                colors = brandColors;
+                if(document.querySelector('#useRandom').checked){
+                    colors = shuffleArray(colors);
+                }
+                colors = extendPalette(colors, 0.2, 3);
+            }
+
+            var _data = data.slice(0, colors.length)
+            //var colors = shuffledRandom[0];
+            d3.select(".chart")
+              .html("")
+              .selectAll("div")
+                .data(_data)
+              .enter().append("div")
+                .style("width", function(d) { return d * 50 + "px"; })
+                .style("height", "40px")
+                //.attr('class', function(d,i){return 'mdc-bg-' + materialColors[i]})
+                .style('background-color', function(d,i){return colors[i % colors.length]})
+                .text(function(d) { return d; });
+            showCurrentPalette();
+            printablePalette();
+        }
+
+        var Storage = window.localStorage;
+        var myPalettes = {};
+        initPalettes();
+        console.log(myPalettes);
+        buildPalettes();
+        
         function shuffleArray(arrayToShuffle){
             var _tempArray = arrayToShuffle.slice(0),
                 _returnArray = [];
@@ -135,38 +210,19 @@
             console.log(_returnArray);
             return _returnArray;
         }
-        var colors = brewerColors;
-
-        function drawChart(){
-            if(document.querySelector('#useJsArray').checked && document.querySelector('#jsArray').value.length > 0){
-                colors = eval(document.querySelector('#jsArray').value);
-            }else if(document.querySelector('#useRandom').checked){
-                colors = shuffleArray(colors);
-            }else if (document.querySelector('#useBrewer').checked){
-                colors = brewerColors;
-            }else if (document.querySelector('#useBrewerPastel').checked){
-                colors = brewerPastel;
+        function extendPalette(palette, step, count){
+            var _returnPalette = palette.slice(0);
+            for(var j = 0 ; j < count ; j++){
+                for(var i = 0 ; i < palette.length ; i++){
+                    _returnPalette.push(chroma.mix(palette[i], '#fff', step * (j + 1)).hex())
+                }
             }
-            //var colors = shuffledRandom[0];
-            d3.select(".chart")
-              .html("")
-              .selectAll("div")
-                .data(data)
-              .enter().append("div")
-                .style("width", function(d) { return d * 50 + "px"; })
-                .style("height", "40px")
-                //.attr('class', function(d,i){return 'mdc-bg-' + materialColors[i]})
-                .style('background-color', function(d,i){return colors[i % colors.length]})
-                .text(function(d) { return d; });
-            showCurrentPalette();
+            /*for(var i = 0 ; i < palette.length ; i++){
+                _returnPalette.push(chroma.mix(palette[i], '#fff', 0.6))
+            }*/
+            console.log(_returnPalette);
+            return _returnPalette;
         }
-
-        var Storage = window.localStorage;
-        var myPalettes = {};
-        initPalettes();
-        console.log(myPalettes);
-        buildPalettes();
-
         function initPalettes(){
             //test for stored palettes
             var storedPalettes = JSON.parse(Storage.getItem('MyPalettes'));
@@ -178,6 +234,7 @@
                 myPalettes = {palettes: [brewerColors]};
                 storePalettes();
             }
+            printablePalette();
         }
         function retreivePalettes(){
             myPalettes = JSON.parse(Storage.getItem('MyPalettes'));
@@ -229,17 +286,17 @@
                 var _d = document.createElement('div');
                 _d.setAttribute('class', 'swatch');
                 _d.setAttribute('style', "background-color:" + colors[i]);
-                var _rgbString = "rgb(" + chroma(colors[i]).rgb() + ')';
-                var _hslString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ',' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
+                var _rgbString = "rgb(" + Math.round(chroma(colors[i]).rgb()[0]) + ', ' +  Math.round(chroma(colors[i]).rgb()[1]) + ', ' + Math.round(chroma(colors[i]).rgb()[2]) + ')';
+                var _hslString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ', ' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
                 var _hexString = chroma(colors[i]).hex();
                 _d.innerHTML = '<p>' + _hexString + '</p><p>' + _rgbString + ' </p><p>' + _hslString + ' </p>';
                 document.querySelector('.currentPaletteContainer span').appendChild(_d);
             }
         }
         function printablePalette(){
-            var _printablePaletteContainer = document.querySelector('.printablePaletteContainer');
-            _printablePaletteContainer.innerHTML = "";
-            for( var j = 0 ; j < 3 ; j++){
+            var _paletteContainer = document.querySelector('.printablePaletteContainer .palette');
+            _paletteContainer.innerHTML = "";
+            for( var j = 0 ; j < 4 ; j++){
                 var _l = document.createElement('ul');
                 for(var i = 0 ; i< colors.length ; i ++){
                     var _colorString;
@@ -251,16 +308,19 @@
                             _colorString = chroma(colors[i]).hex();
                             break;
                         case 1:
-                            _colorString = "rgb(" + chroma(colors[i]).rgb() + ')';
+                            _colorString = "rgb(" + Math.round(chroma(colors[i]).rgb()[0]) + ', ' +  Math.round(chroma(colors[i]).rgb()[1]) + ', ' + Math.round(chroma(colors[i]).rgb()[2]) +  ')';
                             break;
                         case 2:
-                            var _colorString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ',' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
-                            break;    
+                            var _colorString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ', ' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
+                            break;  
+                        case 3:
+                            _colorString = '&ltCOLOR R="' + Math.round(chroma(colors[i]).rgb()[0]) + '" G="' +  Math.round(chroma(colors[i]).rgb()[1]) + '" B="' + Math.round(chroma(colors[i]).rgb()[2]) +  '" A="255" /&gt;';
+                            break;                            
                     }
                     _li.innerHTML = '<p>' + _colorString + '</p>';
                     _l.appendChild(_li);
                 }
-                document.querySelector('.printablePaletteContainer').appendChild(_l);        
+                _paletteContainer.appendChild(_l);        
             }
         }
         function togglePrintablePalette(){
