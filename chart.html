@@ -8,21 +8,10 @@
             box-sizing: border-box;
         }
         div.chartContainer{
-            height: 500px;
-            overflow-x: auto;
-            overflow-y: hidden;
         }
-        .chart{
-            width: 500px; 
-            transform: rotate(-90deg) translateY(-500px);
-            transform-origin: right top;
-        }
-        .chart div{
-            text-align: right;
-            font-size: 24px;
-            padding-right: 12px;
-            padding-top: 6px;
-            margin-bottom: 10px;
+        svg.chart{
+            margin: auto;
+            display: block;
         }
         div.inputs{
             position: absolute;
@@ -85,8 +74,8 @@
     </head>
     <body>
         <div class="chartContainer">
-            <div class="chart">
-            </div>
+            <svg class="chart">
+            </svg>
         </div>
         <div class="inputs">
             <label>Use brewer colours
@@ -179,19 +168,44 @@
             }
 
             var _data = data.slice(0, colors.length)
-            //var colors = shuffledRandom[0];
-            d3.select(".chart")
-              .html("")
-              .selectAll("div")
-                .data(_data)
-              .enter().append("div")
-                .style("width", function(d) { return d * 50 + "px"; })
-                .style("height", "40px")
-                //.attr('class', function(d,i){return 'mdc-bg-' + materialColors[i]})
-                .style('background-color', function(d,i){return colors[i % colors.length]})
-                .text(function(d) { return d; });
+            drawSvgChart(_data);
             showCurrentPalette();
             printablePalette();
+        }
+        
+        function drawSvgChart(data){
+            var width = 960,
+                height = 500;
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            var chart = d3.select("svg.chart")
+                .attr("width", width)
+                .attr("height", height)
+                .html("");
+                
+            y.domain([0, d3.max(data)]);
+            var barWidth = width / data.length;
+            var bar = chart.selectAll("g")
+                .data(data)
+                .enter().append("g")
+                .attr("transform", function(d, i) {
+                    return "translate(" + i * barWidth + ",0)"; 
+                });
+                
+            bar.append("rect")
+                .attr("y", function(d) { 
+                    return y(d); 
+                    })
+                .attr("height", function(d) {
+                    return height - y(d); 
+                    })
+                .attr("width", barWidth - 1)
+                .attr("fill", function(d,i){
+                    return colors[i];
+                    }
+                );
         }
 
         var Storage = window.localStorage;
