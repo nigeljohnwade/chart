@@ -80,6 +80,8 @@
             </svg>
             <svg class="chart pie-chart">
             </svg>
+            <svg class="chart line-chart">
+            </svg>
         </div>
         <div class="inputs">
             <label>Use brewer colours
@@ -177,14 +179,19 @@
                 colors = extendPalette(colors, 0.2, 3);
             }
 
-            var _data = data.slice(0, colors.length)
-            drawLineChart(_data);
+            var _data = data.slice(0, colors.length),
+                _lineData = [];
+            for(var i = 0 ; i < colors.length ; i++){
+                _lineData.push(shuffleArray(data));
+            } 
+            console.log(_lineData);
+            drawColumnChart(_data);
             drawPieChart(_data);
+            drawLineChart(_lineData);
             showCurrentPalette();
             printablePalette();
         }
-        
-        function drawLineChart(data){
+        function drawColumnChart(data){
             var width = 960,
                 height = 500,
                 radius = Math.min(width, height) / 2;
@@ -218,6 +225,44 @@
                     return colors[i];
                     }
                 );
+        }       
+        function drawLineChart(data){
+            var width = 960,
+                height = 500;
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+            var x = d3.scale.linear()
+                .range([0, width]);
+            var chart = d3.select("svg.line-chart")
+                .attr("width", width)
+                .attr("height", height)
+                .html("");
+                
+            y.domain([0, d3.max(data[0])]);
+            x.domain([0, data[0].length])
+            var line = d3.svg.line()
+                .x(function(d, i) {
+                    return x(i); 
+                })
+                .y(function(d, i) {
+                    return y(d); 
+                });
+             var city = chart.selectAll(".city")
+                .data(data)
+                .enter().append("g")
+                .attr("class", "city");
+
+            city.append("path")
+                .attr("class", "line")
+                .attr("d", function(d, i) { 
+                    return line(d); 
+                })
+                .attr("stroke-width", "3px")
+                .attr("fill", "none")
+                .style("stroke", function(d, i) {
+                    return colors[i]; 
+                });
         }
         function drawPieChart(data){
             var width = 960,
