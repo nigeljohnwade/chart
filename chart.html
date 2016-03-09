@@ -101,6 +101,9 @@
             <label>Use randomise
                 <input type="checkbox" id="useRandom" name="options" onchange="drawChart()">
             </label>
+            <label>Use extend
+                <input type="checkbox" id="useExtend" name="options" onchange="drawChart()">
+            </label>
             <input type="button" id="storePalette" onclick="storePalette()" value="Store Palette">
             <input type="button" id="clearPalettes" onclick="clearPalettes()" value="Clear Palettes">
             <input type="button" id="togglePalettes" onclick="togglePalettes()" value="Toggle Palettes">
@@ -146,6 +149,9 @@
                 colors = eval(document.querySelector('#jsArray').value);
                 if(document.querySelector('#useRandom').checked){
                     colors = shuffleArray(colors);
+                }
+                if(document.querySelector('#useExtend').checked){
+                    colors = extendPalette(colors, 0.3, 2);
                 }
             }else if (document.querySelector('#useBrewer').checked){
                 colors = brewerColors;
