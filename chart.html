@@ -17,9 +17,14 @@
         }
         div.inputs{
             position: absolute;
-            right: 0;
+            right: -280px;
             top: 0;
             width: 300px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        div.inputs:hover{
+            right: 0;
         }
         div.inputs > *{
             display: block
@@ -39,6 +44,14 @@
             width: 100%;
             text-align: center;
         }
+        div.swatchContainer{
+            width: 300px;
+            left: -280px;
+            transition: all 0.3s ease;
+        }
+        div.swatchContainer:hover{
+            left: 0px;
+        }
         div.swatchContainer > span, div.currentPaletteContainer > span{
             display:block;
             margin-bottom: 8px;
@@ -57,8 +70,12 @@
             position: absolute;
             text-align: center;
             width: 100%;
-            top: 0;
+            top: 98%;
             background-color: white;
+            transition: all 0.3s ease;
+        }
+        div.printablePaletteContainer:hover{
+            top: 2%;
         }
         div.printablePaletteContainer ul{
             width: 24%;
@@ -112,15 +129,14 @@
             <input type="range" min="1" max="20" step="1" id="linesMax" onchange="drawChart()" />
             <input type="button" id="storePalette" onclick="storePalette()" value="Store Palette">
             <input type="button" id="clearPalettes" onclick="clearPalettes()" value="Clear Palettes">
-            <input type="button" id="togglePalettes" onclick="togglePalettes()" value="Toggle Palettes">
             <input type="button" id="openPrintablePalette" onclick="togglePrintablePalette()" value="Open Printable Palette">
             <input type="button" id="drawChart" onclick="drawChart()" value="Draw Chart">
         </div>
-        <div class="swatchContainer" style="display:none">
+        <div class="swatchContainer">
         </div>
         <div class="currentPaletteContainer">
         </div>
-        <div class="printablePaletteContainer" style="display:none;">
+        <div class="printablePaletteContainer">
         <input type="button" id="closePrintablePalette" onclick="togglePrintablePalette()" value="Close Printable Palette">
             <div class="palette">
             </div>
@@ -391,7 +407,8 @@
                 var _rgbString = "rgb(" + Math.round(chroma(colors[i]).rgb()[0]) + ', ' +  Math.round(chroma(colors[i]).rgb()[1]) + ', ' + Math.round(chroma(colors[i]).rgb()[2]) + ')';
                 var _hslString = "hsl(" + (isNaN(Math.round(chroma(colors[i]).hsl()[0])) ? '0' : Math.round(chroma(colors[i]).hsl()[0]) ) + ', ' + Math.round(chroma(colors[i]).hsl()[1] * 100) + '%, ' + Math.round(chroma(colors[i]).hsl()[2] * 100) + '%)';
                 var _hexString = chroma(colors[i]).hex();
-                _d.innerHTML = '<p>' + _hexString + '</p><p>' + _rgbString + ' </p><p>' + _hslString + ' </p>';
+                var _xmlString = '&lt;COLOR R="' + chroma(colors[i]).rgb()[0] + '" G="' + chroma(colors[i]).rgb()[1] + '" B="' + chroma(colors[i]).rgb()[2] + '" /&gt;';
+                _d.innerHTML = '<p>' + _hexString + '</p><p>' + _rgbString + ' </p><p>' + _hslString + ' </p><p>' + _xmlString + '</p>';
                 document.querySelector('.currentPaletteContainer span').appendChild(_d);
             }
         }
