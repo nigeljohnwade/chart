@@ -1,0 +1,89 @@
+*{
+            box-sizing: border-box;
+        }
+        div.chartContainer{
+            height: 500px;
+            overflow-y: auto;
+        }
+        svg.chart{
+            margin: auto;
+            display: block;
+        }
+        div.inputs{
+            position: absolute;
+            right: -280px;
+            top: 0;
+            width: 300px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        div.inputs:hover{
+            right: 0;
+        }
+        div.inputs > *{
+            display: block
+        }
+        div.inputs textarea{
+            width: 100%
+        }
+        div.swatchContainer, div.currentPaletteContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        div.currentPaletteContainer{
+            top: 520px;
+            width: 100%;
+            text-align: center;
+        }
+        div.swatchContainer{
+            width: 300px;
+            left: -280px;
+            transition: all 0.3s ease;
+        }
+        div.swatchContainer:hover{
+            left: 0px;
+        }
+        div.swatchContainer > span, div.currentPaletteContainer > span{
+            display:block;
+            margin-bottom: 8px;
+        }
+        div.swatchContainer div.swatch, div.currentPaletteContainer div.swatch{
+            width: 32px;
+            height: 32px;
+            display: inline-block;
+            vertical-align: bottom;
+        }
+        div.currentPaletteContainer div.swatch{
+            width: 128px;
+            height: 128px;
+        }
+        div.printablePaletteContainer{
+            position: absolute;
+            text-align: center;
+            width: 100%;
+            top: 98%;
+            background-color: white;
+            transition: all 0.3s ease;
+            height: 2%;
+            overflow: hidden;
+        }
+        div.printablePaletteContainer:hover{
+            top: 2%;
+            height: 100%;
+            overflow: auto;
+        }
+        div.printablePaletteContainer ul{
+            width: 24%;
+            display: inline-block;
+        }
+        div.printablePaletteContainer ul li{
+            list-style-type: none;
+            text-align: center;
+            padding:32px;
+        }
+        div.printablePaletteContainer ul li.swatch{
+            height: 128px;
+        }
