@@ -110,6 +110,11 @@ function drawColumnChart(data){
             return colors[i];
             }
         );
+    
+    setTimeout(function(){
+        data.push(12); 
+        console.log(_data);
+        }, 2000);
 }       
 function drawLineChart(data){
     var width = 960,
@@ -191,7 +196,6 @@ function shuffleArray(arrayToShuffle){
         _elemNumber = Math.floor(Math.random() * _tempArray.length);
         _returnArray[i] = _tempArray.splice(_elemNumber,1)[0];
     }
-    console.log(_returnArray);
     return _returnArray;
 }
 function extendPalette(palette, step, count){
